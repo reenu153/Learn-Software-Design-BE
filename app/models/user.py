@@ -1,9 +1,11 @@
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, Boolean
 from sqlalchemy import Enum as SQLAlchemyEnum
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
 from ..database import Base
-import enum
+import enum, uuid
+from ..enums.progress_status import ProgressStatus
 
 class UserRole(str, enum.Enum):
     student = "student"
@@ -13,8 +15,9 @@ class UserRole(str, enum.Enum):
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String(255), unique=True, nullable=False, index=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True,default=uuid.uuid4)
+  
+    username = Column(String(255), unique=True, nullable=False, index=True)
     hashed_password = Column(String(255), nullable=False)
     role = Column(
         SQLAlchemyEnum(UserRole, name="user_role"),
@@ -23,11 +26,11 @@ class User(Base):
     )
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    solved_questions = relationship(
-        "StudentQuestionProgress",
-        back_populates="user",
-        cascade="all, delete"
-    )
+    progress_records = relationship(
+    "StudentQuestionProgress",
+    back_populates="user",
+    cascade="all, delete"
+)
     submissions = relationship(
         "StudentSubmission",
         back_populates="user",
@@ -40,8 +43,8 @@ class StudentSubmission(Base):
 
     id = Column(Integer, primary_key=True)
 
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    question_id = Column(Integer, ForeignKey("questions.id"), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    question_id = Column(UUID(as_uuid=True), ForeignKey("questions.id"), nullable=False)
 
     solution_text = Column(Text, nullable=False)
 
@@ -53,4 +56,30 @@ class StudentSubmission(Base):
 
     user = relationship("User", back_populates="submissions")
     question = relationship("Question", back_populates="submissions")
+
+
+class StudentQuestionProgress(Base):
+    __tablename__ = "student_question_progress"
+
+    id = Column(Integer, primary_key=True)
+
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    question_id = Column(UUID(as_uuid=True), ForeignKey("questions.id"), nullable=False)
+
+    status = Column(
+        SQLAlchemyEnum(ProgressStatus, name="progress_status"),
+        default=ProgressStatus.not_started,
+        nullable=False
+    )
+
+    attempts = Column(Integer, default=0)
+    xp_earned = Column(Integer, default=0,nullable=True)
+
+    last_attempt_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="progress_records")
+    question = relationship("Question", back_populates="progress_records")
 
