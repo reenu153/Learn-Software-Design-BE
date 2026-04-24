@@ -72,7 +72,7 @@ class UserCreate(BaseModel):
 
 
 class UserResponse(BaseModel):
-    id: str
+    id: UUID
     username: str
     role: UserRole
 
