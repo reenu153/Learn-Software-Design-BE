@@ -8,8 +8,9 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 def evaluate_solution(question: str, solution: str, criteria: str):
+    print("Solution", solution)
     prompt = f"""
-                You are a strict technical evaluator.
+                You are a strict technical evaluator. Evaluate the student solution based on the question and criteria given. 
 
                 Question:
                 {question}

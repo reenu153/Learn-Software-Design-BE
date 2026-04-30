@@ -1,9 +1,9 @@
 from pydantic import BaseModel
-from typing import Optional, List, Dict
+from typing import Optional,Dict, Any, Literal
 from enum import Enum
 from uuid import UUID
 
-class PromptCreate(BaseModel):
+class PromptCreate(BaseModel): 
     prompt_text: str
 
 class UserResponse(BaseModel):
@@ -49,9 +49,11 @@ class CourseCreate(BaseModel):
     difficulty_level: Optional[str]
 
 class EvaluationRequest(BaseModel):
-    # question_id:str
     question_id: UUID
-    solution: str
+    solution_type: Literal["text", "mermaid", "reactflow"]
+    solution_text: Optional[str] = None
+    mermaid_code: Optional[str] = None
+    graph: Optional[Dict[str, Any]] = None  # React Flow JSON
 
 
 class EvaluationResponse(BaseModel):

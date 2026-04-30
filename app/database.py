@@ -14,9 +14,11 @@ if not DATABASE_URL:
 
 engine = create_async_engine(
     DATABASE_URL,
-    echo=True,              # disable in prod
+    echo=False,              # disable in prod
     pool_size=10,
     max_overflow=20,
+    pool_pre_ping=True,     # ✅ add this — detects dropped connections
+    pool_recycle=300,  
 )
 
 AsyncSessionLocal = async_sessionmaker(

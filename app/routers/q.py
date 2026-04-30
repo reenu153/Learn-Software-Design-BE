@@ -3,6 +3,7 @@
 from fastapi import APIRouter
 from app.schemas import EvaluationRequest, EvaluationResponse
 from app.services.llm_service import evaluate_solution
+from app.helpers.generateTextualRepr import generate_text
 import json
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -120,6 +121,94 @@ async def evaluate(request: EvaluationRequest,current_user: User = Depends(get_c
 
     db.add(progress)
     await db.commit()
+    return {
+        "submission_id": submission.id,
+        "feedback": submission.ai_feedback,
+        "passed": submission.passed
+    }
+
+
+@router.post("/evaluate-diagram")
+async def evaluate_dia(
+    request: EvaluationRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+
+    if request.solution_type == "text":
+        normalized_solution = request.solution_text
+
+    elif request.solution_type == "mermaid":
+        normalized_solution = request.mermaid_code
+
+    elif request.solution_type == "reactflow":
+        normalized_solution = generate_text(request.graph)
+
+    else:
+        raise HTTPException(status_code=400, detail="Invalid solution type")
+
+    submission = StudentSubmission(
+        user_id=current_user.id,
+        question_id=request.question_id,
+        solution_type=request.solution_type,
+        solution_text=(
+            request.solution_text
+            if request.solution_type == "text"
+            else None
+        ),
+        solution_json=(
+            request.graph
+            if request.solution_type == "reactflow"
+            else None
+        ),
+    )
+
+    db.add(submission)
+    await db.commit()
+    await db.refresh(submission)
+
+    result = await db.execute(
+        select(Question).where(Question.id == request.question_id)
+    )
+
+    question = result.scalar_one_or_none()
+
+    if not question:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    parts = []
+
+    if question.question_text:
+        parts.append(f"QUESTION:\n{question.question_text}")
+
+    if question.task_description:
+        parts.append(f"TASK DESCRIPTION:\n{question.task_description}")
+
+    if question.starter_diagram:
+        parts.append(f"STARTER DIAGRAM:\n{question.starter_diagram}")
+
+    result = evaluate_solution(
+        "\n\n".join(parts),
+        normalized_solution,
+        question.prompt
+    )
+
+    submission.ai_feedback = json.dumps(result["feedback"])
+    submission.passed = result["passed"]
+
+    await db.commit()
+
+    progress = StudentQuestionProgress(
+        user_id=current_user.id,
+        question_id=request.question_id,
+        status="completed" if submission.passed else "in_progress",
+        xp_earned=question.points if submission.passed else 0,
+        attempts=1
+    )
+
+    db.add(progress)
+    await db.commit()
+
     return {
         "submission_id": submission.id,
         "feedback": submission.ai_feedback,

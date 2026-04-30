@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, Boolean
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, Boolean,JSON
 from sqlalchemy import Enum as SQLAlchemyEnum
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
@@ -46,7 +46,11 @@ class StudentSubmission(Base):
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     question_id = Column(UUID(as_uuid=True), ForeignKey("questions.id"), nullable=False)
 
-    solution_text = Column(Text, nullable=False)
+    solution_text = Column(Text, nullable=True)
+    diagram_json = Column(JSON, nullable=True)
+    solution_type = Column(String, nullable=True)   # text | mermaid | reactflow
+    solution_text = Column(Text, nullable=True)
+    solution_json = Column(JSON, nullable=True)
 
     ai_feedback = Column(Text, nullable=True)
     grade = Column(String(50), nullable=True)
