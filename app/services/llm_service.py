@@ -21,17 +21,16 @@ def evaluate_solution(question: str, solution: str, criteria: str):
                 Evaluation Criteria:
                 {criteria}
 
-                 "feedback_format": 
-    "required_sections": [
-      "Summary of the student's design",
-      "Strengths of the design",
-      "Weaknesses and design issues",
-      "SOLID principle analysis",
-      "Suggested improved design structure",
-      "Concrete improvement suggestions"
-    ],
-    "tone": Constructive, educational, and encouraging. Explain clearly why a design decision is good or problematic so the student can learn.
-    passed is true if thge solution meets some or most of the criterias, even if not stritly fully correct. if it seems like student understudnet the principle concept pass, else failed. be lenient but do not pass if it seems liek solution is not good or underlying principle is wrong.
+                Feedback format - include these sections:
+                - Summary of the student's design
+                - Strengths of the design
+                - Weaknesses and design issues
+                - Suggested improved design structure
+                - Concrete improvement suggestions
+                
+                Tone: Constructive, educational, and encouraging. Explain clearly why a design decision is good or problematic so the student can learn.
+
+                Passing rule: passed is TRUE if the student demonstrates they understand the core concept being tested, even if the solution is incomplete, suboptimal, or has minor mistakes. Only set passed to FALSE if the student has fundamentally misunderstood or completely ignored the main principle. Give benefit of the doubt — a partially correct solution that shows awareness of the principle should pass.
 
                 Respond in JSON format:
                 {{
