@@ -77,6 +77,7 @@ class UserResponse(BaseModel):
     id: UUID
     username: str
     role: UserRole
+    access_token: str
 
     class Config:
         from_attributes = True

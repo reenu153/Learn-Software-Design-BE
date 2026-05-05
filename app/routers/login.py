@@ -72,7 +72,13 @@ async def signup(
     await db.commit()
     await db.refresh(db_user)
 
-    return db_user
+    token = create_access_token({"sub": str(db_user.id)})
+    return  {
+        "access_token": token,
+        "username": db_user.username ,
+        "role": db_user.role,
+        "id": db_user.id
+    }
 
 @router.post("/user")
 async def get_current_user(
