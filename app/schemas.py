@@ -31,6 +31,7 @@ class QuestionResponse(QuestionCreate):
     starter_diagram: Optional[str]
     question_text: str
     module_id: UUID
+    diagram_to_fill: Optional[Dict[str, Any]]
 
     class Config:
         from_attributes = True

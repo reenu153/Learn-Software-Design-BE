@@ -14,6 +14,7 @@ class Question(Base):
     points=Column(Integer, default=0)
     task_description = Column(Text, nullable=True)
     starter_diagram = Column(Text, nullable=True)
+    diagram_to_fill = Column(JSON, nullable=True)
     prompt=Column(Text, nullable=False)
 
     module_id = Column(UUID(as_uuid=True), ForeignKey("modules.id"))
