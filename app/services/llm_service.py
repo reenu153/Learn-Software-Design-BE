@@ -111,10 +111,21 @@ Step 5 — Write targeted feedback using this structure:
      The single smallest change that would most improve this solution right now.
 
 Step 6 — Pass/fail decision.
-passed = TRUE if the student demonstrates awareness of the core concept being tested,
-even if implementation is incomplete or has minor errors.
-passed = FALSE only if the student has fundamentally misunderstood or completely 
-ignored the primary design principle. Give benefit of the doubt.
+Use your Step 2 checklist. Apply this rule strictly:
+
+  passed = TRUE only if ALL of the following hold:
+    - At least 2/3 of must-have criteria are fully "met" (not just partially)
+    - No must-not-have violations are present
+    - The core design principle of the question is demonstrably applied in the solution
+
+  passed = FALSE if:
+    - More than 1/3 must-have is "not met"
+    - Any critical must-not-have is present (e.g. conditional logic, direct concrete dependency)
+    - The solution reproduces the same flawed design described in the question
+
+  Do NOT pass a solution simply because it shows partial effort or names the right concept 
+  without applying it. A diagram that introduces an interface but still violates the principle 
+  (e.g. still has direct concrete dependencies, still has if-else logic) must FAIL.
 
 ---
 
