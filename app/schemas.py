@@ -73,6 +73,9 @@ class UserCreate(BaseModel):
     password: str
     role: UserRole = UserRole.student
 
+class HintRequest(BaseModel):
+    submission_id: int
+
 
 class UserResponse(BaseModel):
     id: UUID

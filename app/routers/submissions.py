@@ -1,7 +1,7 @@
 # app/routers/submissions.py
 
 from fastapi import APIRouter
-from app.schemas import EvaluationRequest, EvaluationResponse
+from app.schemas import EvaluationRequest, HintRequest
 from app.services.llm_service import evaluate_solution
 from app.helpers.generateTextualRepr import generate_text
 import json
@@ -73,63 +73,8 @@ async def get_my_progress(
 
     return modules
 
-
-@router.post("/evaluate")
-async def evaluate(request: EvaluationRequest,current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)):
- 
-    submission = StudentSubmission(
-        user_id=current_user.id,
-        question_id=request.question_id,
-        solution_text=request.solution
-    )
-
-    db.add(submission)
-    await db.commit()
-    await db.refresh(submission)
-
-    result = await db.execute(
-    select(Question)
-    .where(Question.id == request.question_id)
-)
-
-    question = result.scalar_one_or_none()
-
-    if not question:    
-        raise HTTPException(status_code=404, detail="Question not found")
-
-    result = evaluate_solution(
-        question.question_text,
-        request.solution,
-        question.prompt
-    )
-
-    # 3. Update submission record
-    submission.ai_feedback = json.dumps(result["feedback"])
-    submission.passed = result["passed"]
-
-    await db.commit()
-
-    # 4. Update progress table
-    progress = StudentQuestionProgress(
-        user_id=current_user.id,
-        question_id=request.question_id,
-        status="completed" if submission.passed else "in_progress",
-        xp_earned=question.points if submission.passed else 0,
-        attempts=1
-    )
-
-    db.add(progress)
-    await db.commit()
-    return {
-        "submission_id": submission.id,
-        "feedback": submission.ai_feedback,
-        "passed": submission.passed
-    }
-
-
 @router.post("/evaluate-diagram")
-async def evaluate_dia(
+async def evaluate_diagram(
     request: EvaluationRequest,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
@@ -227,6 +172,30 @@ async def get_my_progress(
     )
 
     return result.scalars().all()
+
+@router.post("/submissions/took-hint")
+async def mark_took_hint(body: HintRequest, current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),):
+        result = await db.execute(
+        select(StudentSubmission)
+        .where(
+            StudentSubmission.id == body.submission_id,
+            StudentSubmission.user_id == current_user.id,
+        )
+    )
+        submission = result.scalar_one_or_none()
+    
+        if not submission:
+            raise HTTPException(status_code=404, detail="Submission not found")
+    
+        if submission.took_hint:
+            return { "updated": False, "message": "Already marked" }
+    
+        submission.took_hint = True
+        await db.commit()
+    
+        return { "updated": True }
+ 
 
 
 @router.get("/questions/{question_id}/submissions")

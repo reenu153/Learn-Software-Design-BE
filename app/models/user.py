@@ -51,6 +51,7 @@ class StudentSubmission(Base):
     solution_type = Column(String, nullable=True)   # text | mermaid | reactflow
     solution_text = Column(Text, nullable=True)
     solution_json = Column(JSON, nullable=True)
+    took_hint = Column(Boolean, default=False)
 
     ai_feedback = Column(Text, nullable=True)
     grade = Column(String(50), nullable=True)

@@ -101,6 +101,8 @@ Step 5 — Write targeted feedback using this structure:
      Each item must follow this pattern:
        - State the specific problem visible in their solution
        - Explain WHY it is a problem (what principle it violates)
+       - Give a hint: a guiding question or nudge that points toward the fix
+         without revealing it. Should prompt reflection, not give the answer.
        - Give a concrete, minimal fix (what to change/add, not a full redesign)
 
   c) SELF-CHECK QUESTIONS (2 questions the student can ask themselves)
@@ -147,6 +149,7 @@ Respond in this exact JSON format:
     {{
       "issue": "...",
       "why it matters": "...",
+      "hint": "...",
       "fix": "..."
     }}
   ],
