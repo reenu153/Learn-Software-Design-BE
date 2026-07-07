@@ -389,6 +389,9 @@ QUESTION:
 STUDENT SOLUTION:
 {solution}
 
+Evaluation Criteria:
+{criteria}
+
 ---
 
 EVALUATION INSTRUCTIONS:
