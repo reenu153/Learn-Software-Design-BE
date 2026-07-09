@@ -78,7 +78,7 @@ Step 4 — Determine solution tier.
 
 Step 5 — Write feedback.
 
-  IDEAL feedback structure (use for TIER 1 and TIER 2):
+  IDEAL feedback structure (use for TIER 1):
     a) WHAT YOU GOT RIGHT (2–4 sentences)
        Be specific. Reference actual elements of their solution by name.
        Explain why each design choice is correct, not just that it is correct.
@@ -94,7 +94,7 @@ Step 5 — Write feedback.
        TIER 2: write one optional polish suggestion (1 sentence).
        Frame as "If you want to go further..." not as a required fix.
 
-  NEEDS WORK feedback structure (use for TIER 3 only):
+  NEEDS WORK feedback structure (use for TIER 2-3):
     a) WHAT YOU GOT RIGHT (1–3 sentences)
        Be specific. Reference actual elements of their solution.
 
@@ -115,7 +115,7 @@ Step 5 — Write feedback.
 
 Step 6 — Pass/fail decision.
 
-  DEFAULT TO PASS. Fail only with clear evidence of fundamental misunderstanding.
+ Fail only with clear evidence of fundamental misunderstanding.
 
   passed = TRUE if:
     - The student's solution demonstrates genuine understanding of the core concept,
