@@ -32,6 +32,13 @@ def generate_text(graph: dict) -> str:
                 f"CLASS {name} | attrs: {', '.join(attrs) if attrs else 'none'} | methods: {', '.join(methods) if methods else 'none'}"
             )
 
+        if node_type == "interfaceNode":
+            methods = data.get("methods", []) or []
+
+            nodes_text.append(
+                f"INTERFACE {name} | methods: {', '.join(methods) if methods else 'none'}"
+            )
+
         elif node_type == "componentNode":
             ports = data.get("ports", []) or []
 
@@ -39,8 +46,9 @@ def generate_text(graph: dict) -> str:
                 f"COMPONENT {name} | ports: {', '.join(ports) if ports else 'none'}"
             )
 
-        elif node_type in ("interfaceNode", "interfacePortNode"):
-            nodes_text.append(f"INTERFACE {name}")
+        elif node_type == "interfacePortNode":
+            nodes_text.append(f"INTERFACE PORT {name}")
+
 
         elif node_type == "databaseNode":
             nodes_text.append(f"DATABASE {name}")
@@ -64,5 +72,7 @@ target: {target}
 type: {uml_type}
 """.strip()
         )
+
+    print("\n".join(nodes_text + [""] + edge_lines))
 
     return "\n".join(nodes_text + [""] + edge_lines)
