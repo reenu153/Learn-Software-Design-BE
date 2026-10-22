@@ -32,6 +32,11 @@ def build_question_context(question: Question) -> str:
 
 
 async def evaluate_submission(db: AsyncSession, user: User, request: EvaluationRequest) -> dict:
+    
+    question = await question_service.get_question(db, request.question_id)
+    if not question:
+        raise NotFoundError("Question not found")
+    
     normalized = normalize_solution(request)
 
     submission = StudentSubmission(
@@ -44,10 +49,6 @@ async def evaluate_submission(db: AsyncSession, user: User, request: EvaluationR
     db.add(submission)
     await db.commit()
     await db.refresh(submission)
-
-    question = await question_service.get_question(db, request.question_id)
-    if not question:
-        raise NotFoundError("Question not found")
 
     result = evaluate_solution(build_question_context(question), normalized, question.prompt)
     submission.ai_feedback = json.dumps(result["feedback"])

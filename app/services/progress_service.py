@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,23 +7,29 @@ from app.models import Module, Question, StudentQuestionProgress
 
 
 async def get_module_progress(db: AsyncSession, user_id: UUID, course_path_id: UUID) -> list[dict]:
+    total_xp = (
+        select(func.coalesce(func.sum(Question.points), 0))
+        .where(Question.module_id == Module.id)
+        .correlate(Module)
+        .scalar_subquery()
+    )
+    earned_xp = (
+        select(func.coalesce(func.sum(StudentQuestionProgress.xp_earned), 0))
+        .join(Question, Question.id == StudentQuestionProgress.question_id)
+        .where(Question.module_id == Module.id, StudentQuestionProgress.user_id == user_id)
+        .correlate(Module)
+        .scalar_subquery()
+    )
     query = (
         select(
             Module.id,
             Module.title,
             Module.description,
             Module.order_index,
-            func.coalesce(func.sum(StudentQuestionProgress.xp_earned), 0).label("earned_xp"),
-            func.coalesce(func.sum(func.distinct(Question.points)), 0).label("total_xp"),
-        )
-        .outerjoin(Question, Question.module_id == Module.id)
-        .outerjoin(
-            StudentQuestionProgress,
-            (StudentQuestionProgress.question_id == Question.id)
-            & (StudentQuestionProgress.user_id == user_id),
+            earned_xp.label("earned_xp"),
+            total_xp.label("total_xp"),
         )
         .where(Module.course_path_id == course_path_id)
-        .group_by(Module.id, Module.title, Module.description, Module.order_index)
         .order_by(Module.order_index)
     )
     rows = (await db.execute(query)).all()
@@ -48,13 +55,31 @@ async def get_module_progress(db: AsyncSession, user_id: UUID, course_path_id: U
 async def record_attempt(
     db: AsyncSession, user_id: UUID, question: Question, passed: bool
 ) -> StudentQuestionProgress:
-    progress = StudentQuestionProgress(
-        user_id=user_id,
-        question_id=question.id,
-        status=ProgressStatus.completed if passed else ProgressStatus.in_progress,
-        xp_earned=question.points if passed else 0,
-        attempts=1,
+    result = await db.execute(
+        select(StudentQuestionProgress).where(
+            StudentQuestionProgress.user_id == user_id,
+            StudentQuestionProgress.question_id == question.id,
+        )
     )
-    db.add(progress)
+    progress = result.scalar_one_or_none()
+
+    if progress is None:
+        progress = StudentQuestionProgress(
+            user_id=user_id, question_id=question.id, attempts=0, xp_earned=0
+        )
+        db.add(progress)
+
+    now = datetime.utcnow()
+    progress.attempts += 1
+    progress.last_attempt_at = now
+
+    if progress.status != ProgressStatus.completed:
+        if passed:
+            progress.status = ProgressStatus.completed
+            progress.xp_earned = question.points
+            progress.completed_at = now
+        else:
+            progress.status = ProgressStatus.in_progress
+
     await db.commit()
     return progress
