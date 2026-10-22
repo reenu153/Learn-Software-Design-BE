@@ -5,19 +5,18 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
 )
 from sqlalchemy.orm import declarative_base
+from app.core.config import settings
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL"
-)
-if not DATABASE_URL:
+if not settings.DATABASE_URL:
     raise ValueError("DATABASE_URL is not set")
 
+
 engine = create_async_engine(
-    DATABASE_URL,
+    settings.DATABASE_URL,
     echo=False,              # disable in prod
     pool_size=10,
     max_overflow=20,
-    pool_pre_ping=True,     # ✅ add this — detects dropped connections
+    pool_pre_ping=True, 
     pool_recycle=300,  
 )
 

@@ -1,3 +1,4 @@
-from .user import User, UserRole , StudentSubmission
-from .courses import CoursePath, Module
-from .questions import Question
+from .user import User
+from .course import CoursePath, Module
+from .question import Question
+from .submission import StudentSubmission, StudentQuestionProgress

@@ -1,7 +1,7 @@
 from logging.config import fileConfig
 
 from sqlalchemy import create_engine,pool
-from app.database import Base
+from app.db.session import Base
 from app.models import *
 import os
 
