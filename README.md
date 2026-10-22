@@ -58,12 +58,16 @@ alembic               # Migrations
 app/
 ├── main.py           # FastAPI app entrypoint
 ├── models/           # SQLAlchemy models
-├── schemas.py        # Pydantic schemas
-├── routers/          # API route handlers
-├── services/         # Business logic, AI feedback generation
-├── database.py       # Database session/config
+├── schemas/       # Pydantic schemas
+├── api
+  ├── routers/     # API route handlers
+  ├── debs.py      #common dependent functions
+├── services/         # Business logic
+├── db/session.py     # Database session/config
 └── enums
 └── helpers
+└── llm
+   └── client.py       AI service
 
        
 ```
