@@ -1,7 +1,7 @@
 import json
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.exceptions import AppError, NotFoundError
+from app.core.exceptions import AppError, NotFoundError, ServiceUnavailableError
 from app.llm.client import evaluate_solution
 from app.models import Question, StudentSubmission, User
 from app.schemas import EvaluationRequest
@@ -50,10 +50,13 @@ async def evaluate_submission(db: AsyncSession, user: User, request: EvaluationR
     await db.commit()
     await db.refresh(submission)
 
-    result = evaluate_solution(build_question_context(question), normalized, question.prompt)
-    submission.ai_feedback = json.dumps(result["feedback"])
-    submission.passed = result["passed"]
-    await db.commit()
+    try:
+        result = await evaluate_solution(build_question_context(question), normalized, question.prompt)
+        submission.ai_feedback = json.dumps(result["feedback"])
+        submission.passed = result["passed"]
+        await db.commit()
+    except Exception:
+        raise ServiceUnavailableError("AI feedback is unavailable right now. Please try again.")
 
     await progress_service.record_attempt(db, user.id, question, submission.passed)
 

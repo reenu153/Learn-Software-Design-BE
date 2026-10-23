@@ -5,6 +5,7 @@ from app.core.security import decode_access_token
 from app.db.session import get_db
 from app.models import User
 from app.services import auth_service
+from app.enums.user_role import UserRole
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
@@ -20,3 +21,8 @@ async def get_current_user(
     if user is None:
         raise HTTPException(status_code=401, detail="User not found")
     return user
+
+async def require_instructor(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role != UserRole.instructor:
+        raise HTTPException(status_code=403, detail="Instructor role required")
+    return current_user

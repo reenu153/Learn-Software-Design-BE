@@ -9,3 +9,6 @@ class NotFoundError(AppError):
 
 class AuthError(AppError):
     status_code = 401
+
+class ServiceUnavailableError(AppError):
+    status_code = 503
