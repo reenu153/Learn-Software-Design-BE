@@ -30,7 +30,6 @@ async def register(db: AsyncSession, data: UserCreate) -> dict:
     user = User(
         username=data.username,
         hashed_password=hash_password(data.password),
-        role=data.role,
     )
     db.add(user)
     await db.commit()
